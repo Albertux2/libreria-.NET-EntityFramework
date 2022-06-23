@@ -1,0 +1,245 @@
+﻿@using libreriaAuth.Models
+@using autentifAuthorized.Models
+@using autentifAuthorized.Services
+@using libreriaAuth.Services
+@using Microsoft.AspNet.Identity
+<link rel="stylesheet" href="~/Content/Site.css">
+@{
+    Layout = null;
+    ViewBag.Title = "_Carrito";
+    Carrito carrito = null;
+    if (User.Identity.IsAuthenticated)
+    {
+        carrito = new CarritoRepository().findCarritoByUserId(User.Identity.GetUserId());
+        if (carrito == null)
+        {
+            carrito = new Carrito();
+            carrito.UserId = User.Identity.GetUserId();
+            carrito.productos = new List<Producto>();
+            carrito.active = true;
+            new CarritoRepository().addCarrito(carrito);
+        }
+    }
+    Func<float, int, float> Multiplicar = (a, b) => a * b;
+
+    if (carrito == null)
+    {
+        carrito = new Carrito();
+        carrito.productos = new List<Producto>();
+    }
+}
+<style>
+    .card:active {
+        color: black;
+    }
+
+    .dropdown-item:active {
+        background-color: #FFF;
+        opacity: 0.6;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .carrito {
+        max-height: 50vh;
+        overflow-x: hidden !important;
+    }
+</style>
+<button type="button" class="btn btn-primary rounded-pill position-relative">
+    <i class="glyphicon glyphicon-shopping-cart text-white h3"></i>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="numeroProductosCarrito">
+        @carrito.productosTotales()
+        <span class="visually-hidden">cart items</span>
+    </span>
+</button>
+<ul class="dropdown-menu carrito overflow-scroll" id="@carrito.Id">
+
+    @foreach (Producto producto in carrito.productos)
+    {
+
+
+        <li class="dropdown-item articuloCarrito">
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-md-3 d-flex justify-content-center articulo">
+                        <p class="idProducto visually-hidden">@producto.Id</p>
+                        @if (producto.articulo.imagen == null)
+                        {
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/bd/Draw_book.png" class="img-fluid rounded" alt="...">
+                        }
+                        else
+                        {
+                            <img src="@producto.articulo.imagen" class="img-fluid rounded" alt="...">
+                        }
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate" data-bs-toggle="tooltip" data-bs-placement="bottom" title="@producto.articulo.Titulo">@producto.articulo.Titulo</h5>
+                            <div class="card-text"><small class="text-muted">Precio: <span class="precio">@producto.articulo.Precio</span>€</small></div>
+                            <div class="card-text row align-items-center h-50 ">
+                                <small class="text-muted col-5">Cantidad:</small>
+                                <div class="input-group-sm d-flex col">
+                                    <input type="number" name="cantidad" max="999" class="cantidad form-control d-inline text-muted" value="@producto.cantidad" />
+                                    <a class="btn btn-success text-center text-white editCantidad"><i class="fa-solid fa-pen"></i></a>
+                                </div>
+                            </div>
+                            <div class="card-text"><small class="text-muted">Total: <span class="totalArticulo">@Multiplicar(producto.articulo.Precio, producto.cantidad)</span>€</small></div>
+                        </div>
+                    </div>
+                    <div class="ms-2 col-md-1 d-flex align-items-center justify-content-center">
+                        <a class="btn btn-danger deleteProducto">
+                            <i class="glyphicon glyphicon-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </li>
+    }
+    <li class="dropdown-item">
+        <div class="card">
+            <div class="card-body d-flex justify-content-around align-items-center">
+                <h5 class="card-title m-0">Total:<span class="total">@carrito.calcularTotalConFormato()</span>€</h5>
+                <a class="btn btn-success finalizarCompra @(carrito.calcularTotal()<=0 ? "disabled": "")">Comprar</a>
+            </div>
+        </div>
+    </li>
+
+</ul>
+<!--Ventanas emergentes-->
+<body>
+    <div class="modal fade emergenteCargando" tabindex="-1" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content facturaCargando">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Se está procesando su factura...</h5>
+                    </div>
+                    <div class="modal-body text-center">
+                        <i class="fa-solid fa-spinner fa-spin-pulse fa-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="emergenteCarrito" data-bs-keyboard="false" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content facturaCargada">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa-solid fa-circle-check text-success fa-xl mx-2"></i>Compra realizada con exito</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-dark" role="alert">
+                        <p class="m-0">La compra ha sido efectuada con exito y tiene disponible su factura</p>
+                    </div>
+                    <div class="alert alert-info mb-0" role="alert"><i class="fa-solid fa-circle-info mx-2"></i>La factura siempre estará disponible en su perfil de usuario</div>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-secondary" data-bs-dismiss="modal" onclick='$(".emergenteCargando").modal("hide");window.location.reload()'>Cerrar</a>
+                    <a class="btn btn-danger" id="facturaModal"><i class="fa-solid fa-file-pdf mx-2"></i>Factura</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function reestablecerCarrito() {
+        $.ajax({
+            url: "@Url.Action("Index","Carrito")",
+            type: "get",
+            success: function (data) {
+                $("#carrito").html(data)
+            }
+        })
+    }
+    function finalizarCompra(){
+        var idCarrito = $(".carrito").attr("id");
+        var idDireccion = $("input[name='direccion']:checked").val()
+        if (idDireccion != undefined) {
+            $.ajax({
+                url: "@Url.Action("FinalizarCompra","Carrito")",
+                type: "get",
+                data: { idCarrito: idCarrito, idDireccion: idDireccion },
+                success: function (data) {
+                    if (!data.stockInsuficiente) {
+                        $(".emergenteCargando").modal("show")
+                        $("#facturaModal").attr("href", "Carrito/PdfFactura?idFactura=" + data.idFactura)
+                        reestablecerCarrito();
+                        $("#emergenteCarrito").modal("show")
+                    } else {
+
+                        $("#alertCarritoText").html(data.error).ready(function () {
+                            $("#alertaCarrito").modal("show")
+                        })
+                    }
+                },
+            })
+        } else {
+            alert("Crea o selecciona una dirección")
+        }
+    }
+
+    $(".finalizarCompra").on("click", function () {
+        event.preventDefault();
+        $("#seleccionarDireccion").modal("show")
+
+    })
+    $(".deleteProducto").on('click',
+        function () {
+            event.preventDefault()
+            var card = $(this).parent().parent();
+            var productoId = parseInt(card.find(".idProducto").text())
+            var cantidad = parseInt(card.find(".cantidad").val())
+            var nuevosProductos = parseInt($("#numeroProductosCarrito").text()) - cantidad;
+            var precio = parseFloat(card.find(".precio").text().replace(',', '.'))
+            var precioTotal = parseFloat(card.parent().parent().parent().find(".total").text().replace(',', '.'))
+            card.parent().parent().parent().find(".total").text((precioTotal - precio * cantidad).toFixed(2))
+            $("#numeroProductosCarrito").text(nuevosProductos)
+            var id = parseInt(card.parent().parent().parent().attr("id"))
+            $.ajax({
+                url: "@Url.Action("DeleteProducto","Carrito")",
+                data: { id:id, productoId:productoId },
+                type: "post",
+                success: function () {
+                    card.parent().parent().hide(500, function () {
+                        $(this).remove();
+                    })
+                },
+                error: function (err) {
+                    //console.log(err.status)
+                    console.log(err.responseText)
+                }
+
+            })
+        }
+    )
+    $(".editCantidad").on("click", function () {
+        var card = $(this).parent().parent().parent().parent().parent();
+        var productoId = parseInt(card.find(".idProducto").text())
+        var precio = parseFloat(card.find(".precio").text().replace(',', '.'))
+        var precioTotal = parseFloat(card.find(".totalArticulo").text().replace(',', '.'))
+        var precioCarrito = parseFloat(card.parent().parent().parent().find(".total").text().replace(',','.'))
+        var cantidad = parseInt(card.find(".cantidad").val())
+        var antiguaCantidad = precioTotal / precio
+        var totalCarrito = parseInt($("#numeroProductosCarrito").text());
+        $("#numeroProductosCarrito").text((totalCarrito - antiguaCantidad) + cantidad)
+        var nuevoPrecioTotal = parseFloat(precio * cantidad)
+        card.find(".totalArticulo").text(nuevoPrecioTotal.toFixed(2))
+        var nuevoTotalCarrito = ((precioCarrito - precioTotal) + nuevoPrecioTotal).toFixed(2);
+        card.parent().parent().parent().find(".total").text(nuevoTotalCarrito)
+        $.ajax({
+            url: "@Url.Action("editCantidadProducto","Carrito")",
+            data: { idProducto: productoId, cantidad: cantidad },
+            type: "post",
+            success: function () {
+            }, error: function (err) {
+                console.log(err.responseText)
+            }
+
+        })
+    })
+</script>
+

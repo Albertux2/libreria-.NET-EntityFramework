@@ -1,0 +1,126 @@
+﻿@model autentifAuthorized.Models.Libro
+
+@{
+}
+
+@using (Html.BeginForm("Create","Libro"))
+{
+    @Html.AntiForgeryToken()
+
+    <form class="row">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Isbn, htmlAttributes: new { @class = "form-label" })
+            <div class="row col-md-8">
+                @Html.EditorFor(model => model.Isbn, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Isbn, "", new { @class = "text-danger" })
+                @if(ViewBag.Error!="")
+                {
+                <p class="text-danger mb-0">@ViewBag.Error</p>
+                }
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Titulo, htmlAttributes: new { @class = "form-label" })
+            <div class="row col-md-8">
+                @Html.EditorFor(model => model.Titulo, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Titulo, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Cantidad, htmlAttributes: new { @class = "form-label" })
+            <div class="row col-md-8">
+                @Html.EditorFor(model => model.Cantidad, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Cantidad, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Precio, htmlAttributes: new { @class = "form-label col-md-2" })
+            <div class="row col-md-8">
+                @Html.EditorFor(model => model.Precio, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Precio, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.imagen, htmlAttributes: new { @class = "form-label col-md-10" })
+            <div class="row col-md-8">
+                @Html.EditorFor(model => model.imagen, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.imagen, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label col-md-2">Escoja una editorial</label>
+            <div class="row col-md-8">
+                @Html.DropDownList("editoriales", (List<SelectListItem>)ViewBag.Editoriales, new { @class = "form-control selectEditoriales" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label col-md-2">Escoja un autor</label>
+            <div class="row col-md-8">
+                @Html.DropDownList("autores", (List<SelectListItem>)ViewBag.Autores, new { @class = "form-control selectAutores" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label col-md-2">Escoja un genero</label>
+            <div class="row col-md-8">
+                @Html.DropDownList("generos", (List<SelectListItem>)ViewBag.Tema, new { @class = "form-control selectGeneros" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label col-md-2">Escoja un formato</label>
+            <div class="row col-md-8">
+                @Html.DropDownList("formatos", (List<SelectListItem>)ViewBag.Formato, new { @class = "form-control selectFormatos" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label col-md-2">Escoja un estado</label>
+            <div class="row col-md-8">
+                @Html.DropDownList("estados", (List<SelectListItem>)ViewBag.Estado, new { @class = "form-control selectEstados" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10 my-4">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+                @Html.ActionLink("Volver", "Index", "", htmlAttributes: new { @class = "btn btn-secondary" })
+            </div>
+        </div>
+    </form>
+}
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+<script>
+    $(".selectFormatos").change(function () {
+        if ($(this).val() === "0") {
+            var url = '@Url.Action("CreateFormato", "Libro")';
+            window.location.href = url;
+        }
+    });
+    $(".selectAutores").change(function () {
+        if ($(this).val() === "0") {
+            var url = '@Url.Action("CreateAutor", "Libro")';
+            window.location.href = url;
+        }
+    });
+    $(".selectGeneros").change(function () {
+        if ($(this).val() === "0") {
+            var url = '@Url.Action("CreateGenero", "Libro")';
+            window.location.href = url;
+        }
+    });
+    $(".selectEditoriales").change(function () {
+        if ($(this).val() === "0") {
+            var url = '@Url.Action("CreateEditorial", "Libro")';
+            window.location.href = url;
+        }
+    });
+    $(".selectEstados").change(function () {
+        if ($(this).val() === "0") {
+            var url = '@Url.Action("CreateEstado", "Libro")';
+            window.location.href = url;
+        }
+    });
+</script>

@@ -1,0 +1,66 @@
+﻿@using Microsoft.AspNet.Identity
+<link rel="stylesheet" href="~/Content/icons.css" />
+@Scripts.Render("~/bundles/jquery")
+<style>
+    .dropdown-menu {
+        left: inherit !important;
+        right: 5vw;
+        width: 25vw;
+    }
+</style>
+@if (Request.IsAuthenticated)
+{
+    using (@Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = " d-flex  " }))
+    {
+        <div class="w-100">
+            @Html.AntiForgeryToken()
+            <ul class="list-group list-group-horizontal row">
+                <li class="col-sm-3 mx-1 collapse-li list-unstyled" id="carrito">
+                    @Html.Partial("_Carrito")
+                </li>
+                <li class="col-sm-3 mx-1 bg-dark pe-2 list-unstyled">
+                    <div class="d-flex align-items-center">
+                        <a href="@Url.Action("Index", "Manage")" class="btn btn-info rounded-pill position-relative">
+                            <i class="glyphicon glyphicon-user text-white h3"></i>
+                        </a>
+                    </div>
+                </li>
+                <li class="col-sm-3 mx-1 bg-dark pe-2 deco list-unstyled">
+                    <a class="btn btn-warning rounded-pill position-relative" href="javascript:document.getElementById('logoutForm').submit()">
+                        <i class="glyphicon glyphicon-log-out h3"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    }
+}
+else
+{
+    <ul class="list-group list-group-horizontal pe-4" style="list-style-type:none">
+        <li>
+            @Html.ActionLink("Iniciar sesión", "../Account/Login", "../Account", htmlAttributes: new { @class = "btn btn-info rounded-pill px-4 mx-2", @role = "button" });
+        </li>
+        <li>
+            @Html.ActionLink("Registrarse", "../Account/Register", "../Account", htmlAttributes: new { @class = "btn btn-warning rounded-pill px-4 mx-2", @role = "button" });
+        </li>
+    </ul>
+}
+
+
+<script>
+    $("#carrito").hover(function () {
+        $(this).children('.dropdown-menu').stop(true, true);
+        $(this).children('.dropdown-menu').show(500, function () {
+        })
+    },
+        function () {
+            $(this).children('.dropdown-menu').stop(true, true);
+            $(this).children('.dropdown-menu').hide(500, function () {
+            }
+            )
+        }
+    )
+
+    
+
+</script>

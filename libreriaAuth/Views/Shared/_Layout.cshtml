@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://kit.fontawesome.com/ad6442bba1.js" crossorigin="anonymous"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+</head>
+<body class="p-0">
+    <nav class="navbar navbar-dark bg-dark top-0 mb-4 sticky-top">
+        <div class="container-fluid justify-content-start mx-4">
+            <button class="navbar-toggler mx-3 my-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="#navbarNav" aria-expanded="false">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="me-auto">
+                @Html.ActionLink("Libreria de Alberto", "Index", "Home", new { area = "" }, new { @class = "nav navbar navbar-brand " })
+            </div>
+            @Html.Partial("_LoginPartial")
+        </div>
+        <div class="collapse navbar-collapse my-2 mx-4 row" id="navbarNav">
+            <ul class="list-group mx-4" style="width:90%">
+                @Html.ActionLink("Libros", "Index", "Libro", null, htmlAttributes: new { @class = "list-group-item", @role = "li" })
+                @Html.ActionLink("Editoriales", "IndexEditorial", "Libro", null, htmlAttributes: new { @class = "list-group-item" })
+                @Html.ActionLink("Autores", "IndexAutor", "Libro", null, htmlAttributes: new { @class = "list-group-item", @role = "li" })
+            </ul>
+        </div>
+    </nav>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Libreria de Alberto</p>
+        </footer>
+    </div>
+    @RenderSection("scripts", required: false)
+    <div class="modal fade" id="seleccionarDireccion" tabindex="-1" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Seleccione su direccion</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row p-2 m-2 seleccionarDireccionDiv">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                @Html.Action("SeleccionarDireccion", "Carrito")
+                            }
+                        </div>
+                        <div class="row p-2 m-2">
+                            <btn class="btn btn-primary col-4" data-bs-toggle="modal" href="#crearDireccion" role="button">Añadir una nueva direccion</btn>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</a>
+                        <btn class="btn btn-success finCompraModal" data-bs-dismiss="modal">Comprar con esta direccion</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="crearDireccion" tabindex="-1" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="row w-100">
+                            <a class="btn btn-outline-dark mx-2 col-1" data-bs-toggle="modal" href="#seleccionarDireccion" role="button"><i class="fa-solid fa-arrow-left-long"></i></a>
+                            <h5 class="modal-title col-9 mt-1">Crear direccion</h5>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <div class="direccionesRadio">
+                            @Html.Action("CreateDireccion", "Carrito")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="alertaCarrito" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="justify-content-center alert alert-danger d-flex align-items-center mb-0" role="alert">
+                        <div class="text-center p-2">
+                            <i class="fa-solid fa-triangle-exclamation mx-2 "></i><div style="text-align:left" id="alertCarritoText"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    $(document).ready(function () {
+        $(".finCompraModal").on("click", finalizarCompra
+        )
+    })
+   
+</script>
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/bootstrap")

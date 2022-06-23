@@ -1,0 +1,49 @@
+﻿@model autentifAuthorized.Models.Libro
+
+@{
+    ViewBag.Title = "Details";
+    Layout = null;
+}
+<div>
+    <dl class="dl-horizontal overflow-scroll" style="max-height:25vh;overflow-x:hidden !important">
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Isbn)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Isbn)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Editorial)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Editorial.nombre)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Autor)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Autor.nombre)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Genero)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Genero.nombre)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Formato)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Formato.nombre)
+        </dd>
+
+    </dl>
+</div>

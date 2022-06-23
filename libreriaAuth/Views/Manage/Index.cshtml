@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNet.Identity;
+@using libreriaAuth.Models
+@using libreriaAuth.Services
+@model autentifAuthorized.Models.ListPaginator<Factura>
+@{
+    ViewBag.Title = "Administrar";
+}
+
+<h2>Facturas</h2>
+<div>
+    <table class="table">
+        <thead>
+        <th>Fecha</th>
+        <th>Dirección de envío</th>
+        <th>Importe total</th>
+        <th class="text-center">PDF</th>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Models)
+            {
+                <tr>
+                    <td>
+                        @item.Fecha
+                    </td>
+                    <td>
+                        @item.Direccion.direccionFormateada()
+                    </td>
+                    <td>
+                        @item.ImporteTotal€
+                    </td>
+                    <td class="text-center">
+                        <a class="btn btn-danger w-75" href="@Url.Action("PdfFactura","Carrito",new { idFactura=item.Id})"><i class="fa-solid fa-file-pdf fa-xl"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div class="d-flex justify-content-center">
+@Html.Partial("../Shared/_Paginator")
+</div>

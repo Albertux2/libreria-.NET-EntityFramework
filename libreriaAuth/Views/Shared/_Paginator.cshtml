@@ -1,0 +1,71 @@
+﻿@model autentifAuthorized.Models.PaginatorConfig
+
+
+@{
+    var url = HttpContext.Current.Request.Url.ToString().Replace("pagina=","");
+    if (!url.Contains('?'))
+    {
+        url = url + "?";
+    }
+    ViewBag.Title = "_Paginator";
+    var totalPages = (int)Math.Ceiling((double)Model.TotalObjects / Model.ObjectsPerPage);
+    int first = 1;
+    var radio = 2;
+    var maxPages = radio * 2 + 1;
+    int Last = (totalPages > maxPages) ? maxPages : totalPages;
+    if (Model.ActualPage > radio + 1)
+    {
+        first = Model.ActualPage - radio;
+        if (totalPages > Model.ActualPage + radio)
+        {
+            Last = Model.ActualPage + radio;
+        }
+        else
+        {
+            Last = totalPages;
+        }
+    }
+}
+<style>
+    .disabled {
+        pointer-events: none;
+        opacity:0.6;
+    }
+</style>
+<ul class="pagination">
+    <li class="page-item">@Html.ActionLink("Primera", null, new { pagina = 1 }, new { @class = "page-link" }) </li>
+    @if (Model.ActualPage == 1)
+    {
+        <li><a href="@url&pagina=1" class="page-link disabled">Anterior</a></li>
+    }
+    else
+    {
+        <li><a href="@url&pagina=@(Model.ActualPage-1)" class="page-link">Anterior</a></li>
+    }
+    @for (int i = first; i <= Last; i++)
+    {
+        if (i == Model.ActualPage)
+        {
+            <li><a href="@url&pagina=@(i)" class="page-link">@i</a></li>
+        }
+        else
+        {
+            {
+                <li><a href="@url&pagina=@(i)" class="page-link">@i</a></li>
+
+            }
+        }
+    }
+    @if (Model.ActualPage >= totalPages)
+    {
+        <li class="disabled"><a href="@url&pagina=@(totalPages)" class="page-link">Siguiente</a></li>
+        <li class="disabled"><a href="@url&pagina=@(totalPages)" class="page-link">Última</a></li>
+
+    }
+    else
+    {
+        <li><a href="@url&pagina=@(Model.ActualPage+1)" class="page-link">Siguiente</a></li>
+        <li><a href="@url&pagina=@(totalPages)" class="page-link">Última</a></li>
+    }
+</ul>
+

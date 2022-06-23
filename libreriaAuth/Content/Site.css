@@ -1,0 +1,70 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.grayBackground {
+    background-color: rgb(0,0,0,.09);
+    
+}
+
+.grayBorder {
+    border-color: rgb(0,0,0,.09);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: darkgray;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+}
+@keyframes bigToSmall {
+    from {
+        height:36vh;
+    }
+
+    to {
+        height:9vh;
+    }
+}
+
+@keyframes smallToBig {
+    from {
+        height: 9vh;
+    }
+
+    to {
+        height: 36vh;
+    }
+
+}
+
+

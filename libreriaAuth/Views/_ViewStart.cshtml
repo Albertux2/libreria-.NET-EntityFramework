@@ -1,0 +1,44 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    window.addEventListener("pageshow", function (event) {
+        var historyTraversal = event.persisted ||
+            (typeof window.performance != "undefined" &&
+                window.performance.navigation.type === 2);
+        if (historyTraversal) {
+            // Handle page restore.
+            window.location.reload();
+        }
+    });
+    $("[name='cantidad']").keydown(function (event) {
+        var value = parseInt($(this).val())
+        if (!isNaN(event.key)) {
+            value = parseInt($(this).val() + event.key)
+        }
+        if (event.key == '-') {
+            event.preventDefault();
+            $(this).val(value)
+        }
+        var max = parseInt($(this).attr("max"));
+        var min = parseInt($(this).attr("min"));
+        if (value > max) {
+            event.preventDefault()
+            $(this).val(max)
+        }
+        if (value < min) {
+            event.preventDefault()
+            $(this).val(min)
+        }
+    })
+
+    $("[name='cantidad']").focusout(function () {
+        if ($(this).val() == "") {
+            $(this).val(1)
+        }
+    })
+
+    $("[name='cantidad']").on("paste", function (event) {
+        event.preventDefault();
+    })
+</script>

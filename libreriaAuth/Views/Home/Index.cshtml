@@ -1,0 +1,176 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    var libros = new autentifAuthorized.Services.LibroRepository().FindAllLibros();
+    bool authenticated = User.Identity.IsAuthenticated;
+}
+@Scripts.Render("~/bundles/jquery")
+<style>
+    .text-shadow {
+        text-shadow: -1px -1px 0 #e3dddd, 1px -1px 0 #e3dddd, -1px 1px 0 #e3dddd, 1px 1px 0 #e3dddd;
+    }
+
+    .zoom {
+        position: absolute;
+        width: 125px;
+        opacity: 1;
+    }
+
+    .parallax {
+        background-image: url("~/Content/assets/bookLove.svg");
+        height: 100%;
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
+<div class="row justify-content-center">
+    <div id="carrusel" class="carousel slide carousel-dark w-50 col-12" style="height:75vh" data-bs-ride="carousel" data-bs-pause="hover">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <p class="id visually-hidden">@libros[0].Id</p>
+                <img src="@libros[0].imagen" alt="@libros[0].Titulo" class="d-block w-100" style="height:75vh;object-fit:contain">
+                <div class="carousel-caption d-none d-md-block text-center w-75 text-wrap card pb-0 bg-light">
+                    <p class="text-shadow h5">@libros[0].Titulo.</p>
+                    <p class="h5 pb-3">@libros[0].Autor.nombre</p>
+                    <div class="card-footer p-1 m-0 row align-items-center justify-content-center" ">
+                        <p class="h5 mb-1 p-0 col-3 text-center">
+                            @libros[0].Precio€
+                        </p>
+                        <div class="col-4 row align-items-center justify-content-center ps-0">
+                            <input type="number" min="1" max="99" class=" form-control text-center rounded-pill w-75 inputCarrusel" name="cantidad" value="1" />
+                        </div>
+                        @if (libros[0].Cantidad <= 0)
+                        {
+                            <a class="btn btn-danger col-5 rounded-pill d-flex align-items-center disabled justify-content-center">
+                                <i class="glyphicon glyphicon-shopping-cart m-0"></i>
+                                <span class="border-5">
+                                    Stock insuficiente
+                                </span>
+                            </a>
+                        }
+                        <a class="btn btn-info rounded-pill col-5 align-items-center buy @(authenticated ? "": "disabled")">
+                            <i class="glyphicon glyphicon-shopping-cart"></i>
+                            <span>
+                                Añadir al carrito
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @{ libros.RemoveAt(0);}
+            @foreach (var item in libros)
+            {
+                <div class="carousel-item">
+                    <p class="id visually-hidden">@item.Id</p>
+                    <img src="@item.imagen" alt="@item.Titulo" class="d-block w-100" style="height:75vh;object-fit:contain">
+                    <div class="carousel-caption d-none d-md-block text-center w-75 text-wrap card pb-0 bg-light">
+                        <p class="text-shadow h4">@item.Titulo</p>
+                        <p class="h5 pb-3">@item.Autor.nombre</p>
+                        <div class="card-footer p-1 m-0 row align-items-center justify-content-center">
+                            <p class="h5 mb-1 p-0 col-3 text-center">
+                                @item.Precio€
+                            </p>
+                            <div class="col-4 row align-items-center justify-content-center ps-0">
+                                <input type="number" min="1" max="99" class=" form-control text-center rounded-pill w-75 inputCarrusel" name="cantidad" value="1" />
+                            </div>
+                            @if (item.Cantidad <= 0)
+                            {
+                                <a class="btn btn-danger col-5 rounded-pill d-flex align-items-center disabled justify-content-center">
+                                    <i class="glyphicon glyphicon-shopping-cart m-0"></i>
+                                    <span class="border-5">
+                                        Stock insuficiente
+                                    </span>
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-info rounded-pill col-5 align-items-center buy @(authenticated ? "": "disabled")">
+                                    <i class="glyphicon glyphicon-shopping-cart"></i>
+                                    <span>
+                                        Añadir al carrito
+                                    </span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <!-- Left and right controls/icons -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#carrusel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carrusel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+
+    <script>
+        $("[name='cantidad']").keydown(function (event) {
+        var value = parseInt($(this).val())
+        if (!isNaN(event.key)) {
+            value = parseInt($(this).val() + event.key)
+        }
+        if (event.key == '-') {
+            event.preventDefault();
+            $(this).val(value)
+        }
+        var max = parseInt($(this).attr("max"));
+        var min = parseInt($(this).attr("min"));
+        if (value > max) {
+            event.preventDefault()
+            $(this).val(max)
+        }
+        if (value < min) {
+            event.preventDefault()
+            $(this).val(min)
+        }
+    })
+
+    $("[name='cantidad']").focusout(function () {
+        if ($(this).val() == "") {
+            $(this).val(1)
+        }
+    })
+
+    $("[name='cantidad']").on("paste", function (event) {
+        event.preventDefault();
+    })
+
+    $(".buy").click(
+        function () {
+            event.preventDefault();
+            var $btn = $(this);
+            var $li = $btn.closest('.carousel-item');
+            var btnOffsetTop = $btn.offset().top - 100
+            var btnOffsetRight = window.innerWidth - $btn.offset().left - 200
+            $li.find('img')
+                .clone()
+                .addClass("zoom")
+                .appendTo($li)
+                .animate({ top: "-" + btnOffsetTop, right: "-" + btnOffsetRight, opacity: 0 }, 750);
+
+            setTimeout(function () {
+                $li.find(".zoom").remove();
+            }, 750);
+            var id = $li.find(".id").text();
+            var cantidad = $li.find("[name='cantidad']").val()
+            $.ajax({
+                url: "@Url.Action("addProducto","Carrito")",
+                data: { vendibleId: id, cantidad: cantidad },
+                type: "post",
+                success: function (data) {
+                    $("#carrito").html(data)
+                    },
+                    error:function(err,error)
+                    {
+                        console.log(err.status)
+                        console.log(err.responseText)
+                    }
+            })
+        });
+    </script>
+</div>

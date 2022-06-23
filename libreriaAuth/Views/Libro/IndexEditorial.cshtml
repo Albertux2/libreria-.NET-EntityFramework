@@ -1,0 +1,100 @@
+﻿@model autentifAuthorized.Models.ListPaginator<libreriaAuth.Models.libro.Editorial>
+@using autentifAuthorized.Services
+@{
+    LibroRepository repo = new LibroRepository();
+    ViewBag.Title = "IndexEditorial";
+    int librosEditorial;
+    bool disabled;
+    bool admin = User.IsInRole("Admin");
+}
+
+<h2>Editoriales</h2>
+<a class="btn btn-primary" onclick="location.href='@Url.Action("CreateEditorial", "Libro")'"><i class="fa-solid fa-pen-to-square"></i> Crear </a>
+<p>
+    @*@Html.ActionLink("Create New", "Create")*@
+</p>
+<div class="table-responsive">
+
+    <table class="table table-hover table-striped">
+        <tr>
+            <th>
+                Editorial
+            </th>
+            <th>
+                Libros
+            </th>
+            <th class="text-center">Acciones</th>
+        </tr>
+
+        @foreach (var item in Model.Models)
+        {
+            <tr class="align-middle">
+                <td>
+                    @Html.DisplayFor(modelItem => item.nombre)
+                </td>
+                <td>
+                    @{
+                        librosEditorial = repo.CountLibrosEditorial(item.nombre);
+                        if (librosEditorial > 0)
+                        {
+                            disabled = false;
+                        }
+                        else
+                        {
+                            disabled = true;
+                        }
+                    }
+                    @librosEditorial
+                </td>
+                <td class="text-center">
+                    <a class="btn btn-primary w-50 text-center @(disabled ? "disabled": "")" href="@Url.Action("Index", "Libro", new { tabla = "editoriales", busqueda = item.nombre })">Ver libros <i class="fa-solid fa-book"></i></a>
+                    @if (admin)
+                    {
+                        <a class="btn btn-danger" onclick="deleteEditorial('@item.id')"><i class="fa-solid fa-trash"></i></a>
+                        <a class="btn btn-info" href="@Url.Action("EditEditorial","Libro", new { id = item.id })"><i class="fa-solid fa-xl fa-square-pen"></i></a>
+
+                    }
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<div class="modal fade" id="alertaEditorial" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="justify-content-center alert alert-danger d-flex align-items-center mb-0" role="alert">
+                    <div>
+                        <i class="fa-solid fa-triangle-exclamation mx-2 "></i>No se pueden eliminar editoriales con libros asociados<i class="mx-2 fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-center">
+    @Html.Partial("../Shared/_Paginator", Model)
+</div>
+<script>
+    function deleteEditorial(id) {
+        $.ajax({
+                url: "@Url.Action("DeleteEditorial", "Libro")",
+                data: { id:id},
+                type: "get",
+                success: function (data) {
+                    console.log(data.result)
+                    if (data.result) {
+                        window.location.href = "@Url.Action("IndexEditorial","Libro")"
+                    } else {
+                        $("#alertaEditorial").modal("show")
+                    }
+                },
+                error: function (err) {
+                    //console.log(err.status)
+                    console.log(err.responseText)
+                }
+
+            })
+    }
+</script>

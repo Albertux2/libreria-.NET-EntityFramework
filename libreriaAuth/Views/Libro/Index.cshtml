@@ -1,0 +1,217 @@
+﻿@model autentifAuthorized.Models.ListPaginator<autentifAuthorized.Models.Libro>
+@using Microsoft.AspNet.Identity
+@{
+
+    int[] array = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    var list = array.Select((x, index) => new SelectListItem { Text = x.ToString(), Value = x.ToString() });
+    bool admin = User.IsInRole("Admin");
+}
+
+<link rel="stylesheet" href="~/Content/Site.css">
+<style>
+    .card-img-top {
+        width: 100%;
+        height: 36vh;
+        object-fit: cover;
+        animation: smallToBig 0.8s;
+    }
+
+    .card-img-top-cropped {
+        height: 9vh;
+        animation: bigToSmall 0.8s;
+    }
+
+    .zoom {
+        position: absolute;
+        width: 125px;
+        opacity: 1;
+    }
+
+    .elipsis:hover {
+        text-overflow: clip;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .card-margin {
+        margin-right: 0.7rem !important;
+        margin-left: 0.7rem !important;
+    }
+</style>
+<form class="row my-3 justify-content-center">
+    <div class="col-8 row">
+        <input name="filtro" id="filtro" class="form-control" />
+    </div>
+    <div class="col-2">
+        <button type="submit" class="btn btn-success w-100"><i class="glyphicon glyphicon-search"></i> Filtrar</button>
+    </div>
+    @if(User.IsInRole("Admin"))
+    {
+    <div class="col-1">
+        <a class="btn btn-primary" onclick="location.href='@Url.Action("Create", "Libro")'"><i class="fa-solid fa-pen-to-square"></i> Crear </a>
+    </div>
+    }
+</form>
+<div class="container d-flex flex-md-wrap align-items-center justify-content-center">
+    @foreach (var item in Model.Models)
+    {
+        <div class="card card-margin shadow mb-2 " style="width:18rem">
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @if (item.Cantidad > 99)
+                {
+                    <p class="m-0 p-0 stockCard">99<span class="fw-bold">+</span></p>
+                }
+                else
+                {
+                    <p class="m-0 p-0 stockCard">@item.Cantidad</p>
+                }
+                <span class="visually-hidden">cart items</span>
+            </span>
+            <p class="id visually-hidden">@item.Id</p>
+            <div class="card-header text-truncate elipsis grayBackground fw-bold">
+                @item.Titulo
+            </div>
+            @if (item.imagen == null)
+            {
+                <img class="card-img-top img-fluid" src="http://www.comunidadbaratz.com/wp-content/uploads/Instrucciones-a-tener-en-cuenta-sobre-como-se-abre-un-libro-nuevo.jpg" />
+            }
+            else
+            {
+                <img class="card-img-top" src="@item.imagen" />
+            }
+            <div class="card-body text-center row justify-content-center align-content-center">
+                <div class="col-6 pe-0">
+                    <button class="btn btn-primary btnCollapse" type="button">
+                        Ver detalles
+                    </button>
+                </div>
+                <div class="collapse collapseDetails" style="max-height:25vh;">
+                    @{Html.RenderAction("Details", new { id = item.Id });}
+                </div>
+                @if (admin)
+                {
+                    <div class="col-6 ps-0">
+                        <button class="btn btn-danger btnAdmin" type="button">
+                            Administrador
+                        </button>
+                    </div>
+                    <div class="collapse collapseAdmin mt-3" style="max-height:25vh;">
+                        <a class="btn btn-danger" onclick="deleteLibro('@item.Id')"><i class="fa-solid fa-trash"></i></a>
+                        <a class="btn btn-info" href="@Url.Action("Edit","Libro", new { id = item.Id })"><i class="fa-solid fa-xl fa-square-pen"></i></a>
+                    </div>
+                }
+            </div>
+            <div class="card-footer fw-bold gx-5 p-2 d-flex justify-content-around align-items-center p-0">
+                @item.Precio€
+                <div class="row align-items-center justify-content-center">
+                    <input type="number" min="1" max="99" class="col-2 form-control text-center rounded-circle w-75" name="cantidad" value="1" />
+                </div>
+                @if (item.Cantidad <= 0)
+                {
+                    <a class="btn btn-danger rounded-pill d-flex align-items-center disabled">
+                        <i class="glyphicon glyphicon-shopping-cart m-0"></i>
+                        <span class="border-5">
+                            Stock insuficiente
+                        </span>
+                    </a>
+                }
+                else
+                {
+                    <a class="btn btn-info rounded-pill  addToCart d-flex align-items-center">
+                        <i class="glyphicon glyphicon-shopping-cart m-0"></i>
+                        <span class="border-5">
+                            Añadir al carrito
+                        </span>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>
+<div class="d-flex align-items-center justify-content-center">
+    @{ Html.RenderPartial("_paginator", Model);}
+</div>
+<div class="modal fade" id="alertaLibro" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="justify-content-center alert alert-danger d-flex align-items-center mb-0" role="alert">
+                    <div>
+                        <i class="fa-solid fa-triangle-exclamation mx-2 "></i><a id="libroAlertText"></a><i class="mx-2 fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var index = 0;
+    function deleteLibro(id) {
+        $.ajax({
+                url: "@Url.Action("deleteLibro", "Libro")",
+                data: { id:id},
+                type: "get",
+                success: function (data) {
+                    console.log(data.result)
+                    if (data.result) {
+                        window.location.href = "@Url.Action("Index","Libro")"
+                    } else {
+                        $("#libroAlertText").text("No se pueden eliminar libros relacionados con facturas o carritos.")
+                        $("#alertaLibro").modal("show")
+                    }
+                },
+                error: function (err) {
+                    //console.log(err.status)
+                    console.log(err.responseText)
+                }
+
+            })
+    }
+    $(".btnCollapse").click(
+        function () {
+            $(this).parent().parent().children('.collapseDetails').toggle('show');
+            $(this).parent().parent().parent().children('.card-img-top').toggleClass('card-img-top-cropped')
+        },
+    );
+    $(".btnAdmin").click(
+        function () {
+            $(this).parent().parent().find('.collapseAdmin').toggle('show');
+        })
+
+    $(".addToCart").click(
+        function () {
+            var $btn = $(this);
+            var $li = $btn.closest('.card');
+            var btnOffsetTop = $btn.offset().top - 50
+            var btnOffsetRight = window.innerWidth - $btn.offset().left - 200
+            index++;
+            var removeClass = "number" + index
+            $li.find('img')
+                .clone()
+                .addClass("zoom")
+                .addClass(removeClass)
+                .appendTo($li)
+                .animate({ top: "-" + btnOffsetTop, right: "-" + btnOffsetRight, opacity: 0 }, 1000);
+
+            setTimeout(function () {
+                $li.find(removeClass).remove();
+            }, 1000);
+            event.preventDefault();
+            var id = $(this).parent().parent().find(".id").text().trim()
+            var cantidad = $(this).parent().parent().find("[name='cantidad']").val()
+            $.ajax({
+                url: "@Url.Action("addProducto","Carrito")",
+                data: { vendibleId: id, cantidad: cantidad },
+                type: "post",
+                success: function (data) {
+                    $("#carrito").html(data)
+                    },
+                    error:function(err,error)
+                    {
+                        console.log(err.status)
+                        console.log(err.responseText)
+                    }
+            })
+        },
+    );
+</script>

@@ -1,0 +1,106 @@
+﻿@model libreriaAuth.Models.Factura
+@{ 
+    Layout = null;
+}<head>
+<link rel="stylesheet" href="~/Content/bootstrap.css" />
+<link rel="stylesheet" href="~/Content/Site.css" />
+</head>
+<style>
+    /* SOLUCIONA PROBLEMA DE SOLAPAMIENTO EN TABLAS <table /> */
+    thead {
+        display: table-header-group
+    }
+
+    tfoot {
+        display: table-row-group
+    }
+
+    tr {
+        page-break-inside: avoid
+    }
+    td{
+        padding:8px;
+        text-align:center;
+    }
+    .noBorder {
+        border-bottom: 1px solid Transparent !important;
+        border-left: 1px solid Transparent !important;
+    }
+</style>
+<body style="padding: 0px; margin: 0px;">
+    <div class="container">
+        <div class="my-5">
+            <h2>
+                Usuario: @Model.Carrito.User.UserName
+            </h2>
+            <h2>
+                Fecha: @Model.Fecha
+            </h2>
+            <h2>
+                Dirección: @Model.Direccion.direccionFormateada()
+            </h2>
+        </div>
+        <table class="table w-100">
+            <thead>
+                <tr>
+                    <th>Nº&nbsp;</th>
+                    <th>
+                        Producto
+                    </th>
+                    <th>
+                        Precio
+                    </th>
+                    <th>
+                        Cantidad
+                    </th>
+                    <th>
+                        Total
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var _count = 0;
+                    float precioTotal = 0;
+                }
+                @foreach (var item in Model.Carrito.productos)
+                {
+                    _count++;
+                    <tr>
+                        <td>
+                            @_count
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.articulo.Titulo)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.articulo.Precio)€
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.cantidad)
+                        </td>
+                        <td>
+                            @{ var precioTotalArticulo = item.articulo.Precio * item.cantidad;
+                                precioTotal += precioTotalArticulo;
+                            }
+                            @precioTotalArticulo€
+                        </td>
+
+                    </tr>
+                }
+                <tr>
+                    <td colspan="3" class="noBorder">
+                    </td>
+                    <th>
+                        TOTAL: 
+                    </th>
+                    <th>
+                        @precioTotal€
+                    </th>
+
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+</body>
